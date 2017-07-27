@@ -18,19 +18,17 @@ public class ClientDownloadConnection extends Thread {
     private long descargadoDelArchivo;
     private String idCliente;
     private String nombreVideo;
-    private String autorVideo;
     private int indiceServidor;
     private long byteInicio;
     private FileOutputStream out = null;
     private DataInputStream dis=null;
           
     private DataOutputStream dos = null;
-    public ClientDownloadConnection(long byteInicio, int indiceServ,String Ip, int puerto,String nombreVideo,String autorVideo,String id) {
+    public ClientDownloadConnection(long byteInicio, int indiceServ,String Ip, int puerto,String nombreVideo,String id) {
     this.Ip= Ip;
     this.puerto=puerto;
     this.idCliente= id;
     this.nombreVideo=nombreVideo;
-    this.autorVideo=autorVideo;
     this.indiceServidor=indiceServ;
     this.byteInicio=byteInicio;
     try{
@@ -43,7 +41,6 @@ public class ClientDownloadConnection extends Thread {
     this.descargadoDelArchivo=byteInicio;
     }
     public String getNombreVideo(){return nombreVideo;}
-    public String getAutorVideo(){return autorVideo;}
     public String getIp() {return Ip;}
     public int getPuerto() {return puerto;}    
     public int getIndiceServidor(){return indiceServidor;}
@@ -95,7 +92,6 @@ public class ClientDownloadConnection extends Thread {
             dos.writeLong(byteInicio);
             dos.writeUTF (idCliente);
             dos.writeUTF(this.nombreVideo);
-            dos.writeUTF(this.autorVideo);
             nombreArchivo =dis.readUTF();
             try {  
                 if (byteInicio==0){

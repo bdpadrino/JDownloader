@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.*;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * CLASE PPAL DEL CLIENTE CON MENU DE OPCIONES PARA LISTAR Y DESCARGAR VIDEOS
@@ -68,54 +69,62 @@ public class Client {
                
                 if ( "L".equals(Instrucciones[0])){
                     dataToServer.writeUTF("L");
-                    //LEE EL TAMANO DE LA LISTA DE VIDEOS A RECIBIR
                     x = dataFromServer.readInt(); 
                     System.out.println(x);
                     System.out.printf( "%-40s %n", "Lista de Peliculas Disponibles");
                     System.out.println("***********************************");
                     for(int i=0; i<x; i++){
                         lectura =dataFromServer.readUTF();
-                        Lectura= lectura.split("\\.",3);
+                        Lectura= lectura.split(Pattern.quote("."));
                         System.out.printf( "%-40s %n", Lectura[0]); 
                     }
                     System.out.println("************************************");
                 }
                 
                 else if ( ("D".equals(instruccion))){
+                    // INICIO - PROCESO DE DESCARGA
                     System.out.print("Introduzca Nombre del Video:");
-                    String Comando= teclado.nextLine();
-                    dataToServer.writeUTF("a-"+Comando);
-                    //LEE EL TAMANO DEL ARCHIVO
-                    x = dataFromServer.readInt(); 
+                    String videoName = teclado.nextLine();
+                    
+                    // INICIO - BUSCAR VIDEO EN EL SERVIDOR
+                    System.out.println("Buscando video...");
+                    dataToServer.writeUTF("B-" + videoName);
+                    x = dataFromServer.readInt();
                     ArrayList<String> videosADescargar=new ArrayList<String>();
                    
-                    for(int i=0; i<x; i++){
-                        lectura =dataFromServer.readUTF();
-                        Lectura= lectura.split("\\.",3);
-                        if ("fin".equals(Lectura[0])){break; }
-                            videosADescargar.add("d-"+Lectura[0]+"-"+Lectura[1]);
+                    for(int i=0; i<x; i++){                        
+                        lectura = dataFromServer.readUTF();
+                        if ("fin".equals(lectura)) {
+                            break; 
+                        } else {
+                            videosADescargar.add("D-"+lectura);
+                            System.out.println("Se encontró video");
                         }
-                    Lectura=null;
+                    }
+                    // FIN - BUSCAR VIDEO EN EL SERVIDOR
                     
-                    for(int i=0; i<videosADescargar.size(); i++){
-                        dataToServer.writeUTF(videosADescargar.get(i));
-                        String respues=dataFromServer.readUTF();
-                        if (respues.equals("ok")){
+                    Lectura = null;
+                    
+                    // INICIO - DESCARGAR VIDEOS DEL SERVIDOR (Por ahora solo uno, pero se puede escalar)
+                    for (String videoADescargar : videosADescargar) {
+                        dataToServer.writeUTF(videoADescargar);
+                        String respuesta=dataFromServer.readUTF();
+                        if (respuesta.equals("ok")) {
                             int indiceServ=dataFromServer.readInt();
                             int puerto=dataFromServer.readInt();
                             String Ip=dataFromServer.readUTF();
-                            Lectura=videosADescargar.get(i).split("-",3);
-                            System.out.println(Lectura[1]+" "+Lectura[2]);
-                            
+                            Lectura = videoADescargar.split("-");
+                            System.out.println(Lectura[1]);
                             //LLAMADO AL HILO PARA RECIBIR LA DESCARGA
-                            ClientDownloadConnection clientDownloadConnection=new ClientDownloadConnection(0,indiceServ,Ip,puerto,Lectura[1],Lectura[2],clientId);
+                            ClientDownloadConnection clientDownloadConnection=new ClientDownloadConnection(0,indiceServ,Ip,puerto,Lectura[1],clientId);
                             downloadList.add(clientDownloadConnection);
                             clientDownloadConnection.start();
-                        }
-                        else { 
+                        } else { 
                             System.out.println("El video no se encuentra en el sistema"+Lectura[1]);
                         }
                     }
+                    // FIN - DESCARGAR VIDEOS DEL SERVIDOR
+                    // FIN - PROCESO DE DESCARGA
                 }
                     
                 int i=0;
@@ -128,13 +137,12 @@ public class Client {
                             dataToServer.writeUTF(STemp);
                             dataToServer.writeInt(downloadList.get(i).getPuerto());
                             dataToServer.writeUTF(downloadList.get(i).getNombreVideo());
-                            dataToServer.writeUTF(downloadList.get(i).getAutorVideo());
                             downloadList.remove(i);
                             i--;
                         }else {
                             System.out.println("Ups se callo la descarga de: "+downloadList.get(i).getNombreVideo());
                             System.out.println("Retomando Descarga");
-                            dataToServer.writeUTF("dr-"+downloadList.get(i).getNombreVideo()+"-"+downloadList.get(i).getAutorVideo());
+                            dataToServer.writeUTF("dr-"+downloadList.get(i).getNombreVideo());
                             dataToServer.writeInt(downloadList.get(i).getIndiceServidor());
                             String respues=dataFromServer.readUTF();
                             if (respues.equals("ok")){
@@ -142,7 +150,7 @@ public class Client {
                                 int puerto=dataFromServer.readInt();
                                 String Ip=dataFromServer.readUTF();
                                 //RETOMANDO DESCARGA CON EL HILO QUE RECIBE EL ARCHIVO    
-                                ClientDownloadConnection clientDownloadConnection=new ClientDownloadConnection(downloadList.get(i).descargadoDelArchivo(),indiceServ,Ip,puerto,downloadList.get(i).getNombreVideo(),downloadList.get(i).getAutorVideo(),clientId);
+                                ClientDownloadConnection clientDownloadConnection=new ClientDownloadConnection(downloadList.get(i).descargadoDelArchivo(),indiceServ,Ip,puerto,downloadList.get(i).getNombreVideo(),clientId);
                                 downloadList.remove(i);
                                 downloadList.add(clientDownloadConnection);
                                 clientDownloadConnection.start();

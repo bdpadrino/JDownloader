@@ -94,26 +94,20 @@ public class ClientConnection extends Thread {
                 instruccion= dis.readUTF();
                 System.out.println(instruccion);
                 Instrucciones= instruccion.split("-");
-                if ("a".equals(Instrucciones[0]) ) {
-                    System.out.println("paso");
+                if ("B".equals(Instrucciones[0]) ) {
                     x=ListaVideosYSusServidores.size();
                     dos.writeInt(x);
                     for(int i=0; i<x; i++){
                         libroTemp=ListaVideosYSusServidores.get(i);
-                        STemp = libroTemp.getNombre();
-                        /*if ((libroTemp.getAutor()).equals(Instrucciones[1])){
-                            STemp=libroTemp.getNombre()+"."+libroTemp.getAutor()+".";
-                            for(int j=0; j<libroTemp.getGenerosSize(); j++){
-                                STemp=STemp+libroTemp.getGenero(j)+" ";
-                            }
-                        dos.writeUTF(STemp);
-                        }*/
-                        dos.writeUTF(STemp);
-
+                        System.out.println(libroTemp.getNombre());
+                        if ((libroTemp.getNombre()).equals(Instrucciones[1])){
+                            STemp=libroTemp.getNombre();
+                            dos.writeUTF(STemp);
+                            break;
+                        }
                     }
                     dos.writeUTF("fin");
                 } else if ( "L".equals(instruccion) ) {
-                    System.out.println("ENTRO EN L");
                     System.out.println(ListaVideosYSusServidores.size());
                     x = ListaVideosYSusServidores.size();
                     dos.writeInt(x);
@@ -122,19 +116,16 @@ public class ClientConnection extends Thread {
                         STemp=libroTemp.getNombre();                        
                         dos.writeUTF(STemp);
                     }
-                } else if ( "d".equals(Instrucciones[0]) || "descarga".equals(Instrucciones[0]) ) {
-                    x=ListaVideosYSusServidores.indexOf((new VideoForDownloadServer(new Video(Instrucciones[1],Instrucciones[2]))));
-                    if (x>=0){
-                        
-                        String IpSD="";
-                        int puertoSD=0;
+                } else if ( "D".equals(Instrucciones[0]) || "descarga".equals(Instrucciones[0]) ) {
+                    x=ListaVideosYSusServidores.indexOf((new VideoForDownloadServer(new Video(Instrucciones[1]))));
+                    if (x >= 0) {
                         int indiceServidorD;
                         y=0;
                         int indiceServidorDConMenosClientes=-1;
                         int menorCantidadDeClientes=Integer.MAX_VALUE;
                         int lenghtListaDeServidoresDelLibro=ListaVideosYSusServidores.get(x).getServidoresSize();
                         int numClientesEnServidorActual;
-                        while(!(menorCantidadDeClientes==0) && y<lenghtListaDeServidoresDelLibro ){
+                        while(!(menorCantidadDeClientes==0) && y<lenghtListaDeServidoresDelLibro ) {
                             indiceServidorD=ListaVideosYSusServidores.get(x).getServidor(y);
 
                             numClientesEnServidorActual=DatosServer.get(indiceServidorD).getClientesActuales();
@@ -145,9 +136,8 @@ public class ClientConnection extends Thread {
                             }
                             y++;
                         }
-                        if (indiceServidorDConMenosClientes>=0){
+                        if (indiceServidorDConMenosClientes>=0) {
                             DatosServer.get(indiceServidorDConMenosClientes).sumarCliente(); //Se agrega un cliente al contador de clientes del ServidorD
-                            //ListaLibrosYSusServidores.get(x).sumarDescarga(indiceServidorDConMenosClientes); // Al libro se le agrega uno al contador descargando
                             ListaVideosYSusServidores.get(x).sumarDescarga(indiceServidorDConMenosClientes); // Al libro se le agrega uno al contador descargando
                             System.out.println(idUsuario+" descarga "+ Instrucciones[1]+" con el server # "+ indiceServidorDConMenosClientes);
                             

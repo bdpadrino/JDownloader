@@ -64,9 +64,8 @@ public class ClientConnection extends Thread {
                 ClienteActual=ListaClientes.get(indiceCliente);
             }
             String nombreVideo= dis.readUTF();
-            String autor= dis.readUTF();
-            System.out.println("El usuario "+this.idUsuario+" solicita "+nombreVideo+" de "+autor);
-            this.indiceVideo=ListaVideos.indexOf(new Video(nombreVideo,autor));
+            System.out.println("El usuario "+this.idUsuario+" solicita "+nombreVideo);
+            this.indiceVideo=ListaVideos.indexOf(new Video(nombreVideo));
             
             ListaVideos.get(this.indiceVideo).sumarDescargando();
             
