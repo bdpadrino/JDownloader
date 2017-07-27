@@ -1,5 +1,5 @@
-
 package SCentral;
+
 import Model.DownloadServer;
 import Model.VideoForDownloadServer;
 import Model.Video;
@@ -92,14 +92,12 @@ public class ClientConnection extends Thread {
             
             do {
                 instruccion= dis.readUTF();
-                System.out.println(instruccion);
                 Instrucciones= instruccion.split("-");
                 if ("B".equals(Instrucciones[0]) ) {
                     x=ListaVideosYSusServidores.size();
                     dos.writeInt(x);
                     for(int i=0; i<x; i++){
                         libroTemp=ListaVideosYSusServidores.get(i);
-                        System.out.println(libroTemp.getNombre());
                         if ((libroTemp.getNombre()).equals(Instrucciones[1])){
                             STemp=libroTemp.getNombre();
                             dos.writeUTF(STemp);
@@ -108,7 +106,6 @@ public class ClientConnection extends Thread {
                     }
                     dos.writeUTF("fin");
                 } else if ( "L".equals(instruccion) ) {
-                    System.out.println(ListaVideosYSusServidores.size());
                     x = ListaVideosYSusServidores.size();
                     dos.writeInt(x);
                     for(int i=0; i<x ; i++){
@@ -158,8 +155,8 @@ public class ClientConnection extends Thread {
                     } else {
                         dos.writeUTF("El Libro solicitado no esta en la libreria");
                     }                
-                } else if ( "dr".equals(Instrucciones[0]) || "descarga r".equals(Instrucciones[0]) ){
-                    x=ListaVideosYSusServidores.indexOf((new VideoForDownloadServer(new Video(Instrucciones[1],Instrucciones[2]))));
+                } else if ( "DR".equals(Instrucciones[0]) || "descarga r".equals(Instrucciones[0]) ){
+                    x=ListaVideosYSusServidores.indexOf((new VideoForDownloadServer(new Video(Instrucciones[1]))));
                     if (x>=0){
                         int IndiceServidorFallido=dis.readInt();
                         if ((DescargasEnServidor.get(IndiceServidorFallido)>0)){
@@ -214,8 +211,7 @@ public class ClientConnection extends Thread {
                     int puertoTemp =dis.readInt();
                     int indiceServidorD= DatosServer.indexOf(new DownloadServer(STemp,puertoTemp));
                     String nombreL=dis.readUTF();
-                    String autorL=dis.readUTF();
-                    int indiceLibro= ListaVideosYSusServidores.indexOf(new VideoForDownloadServer(new Video(nombreL,autorL)));
+                    int indiceLibro= ListaVideosYSusServidores.indexOf(new VideoForDownloadServer(new Video(nombreL)));
                     ListaVideosYSusServidores.get(indiceServidorD).sumarDescarga( indiceServidorD);
 
                     DatosServer.get(indiceServidorD).restarCliente();

@@ -1,4 +1,3 @@
-
 package Client;
 import java.io.*;
 import java.net.Socket;
@@ -142,7 +141,7 @@ public class Client {
                         }else {
                             System.out.println("Ups se callo la descarga de: "+downloadList.get(i).getNombreVideo());
                             System.out.println("Retomando Descarga");
-                            dataToServer.writeUTF("dr-"+downloadList.get(i).getNombreVideo());
+                            dataToServer.writeUTF("DR-"+downloadList.get(i).getNombreVideo());
                             dataToServer.writeInt(downloadList.get(i).getIndiceServidor());
                             String respues=dataFromServer.readUTF();
                             if (respues.equals("ok")){
