@@ -22,22 +22,19 @@ public class Video extends Object {
 
     
     /**
-    * crea un DatosLibro con solo nombre y autor (se usa para crear un DatosLibro para hacer comparaciones)
-    * @param IdNombre es el nombre del libro 
+    * Crea un Video con solo nombre (se usa para crear un Video para hacer comparaciones)
+    * @param Nombre es el nombre del video 
     */      
     public Video(String Nombre) {
         this.Nombre=Nombre;       
         descargas=0;
         cantidadDescargando=0;
-
     }
 
     /**
     * Este lo usa el servidor de descarga por que el es el que conoce el path y al unico que le importa
-    * @param Nombre Nombre del libro
-    * @param Autor Autor del libro
-    * @param Genero ArrayList <String> que contiene los generos del libro
-    * @param path contiene el nombre completo del archivo del libro (si a este se le agrega el path de carpeta se tiene el path del libro)
+    * @param Nombre Nombre del video
+    * @param path contiene el nombre completo del archivo del video (si a este se le agrega el path de carpeta se tiene el path del video)
     */
     public Video(String Nombre, String path) {
         this.Nombre=Nombre;
@@ -48,12 +45,10 @@ public class Video extends Object {
     
     /**
     * Este lo usa el servidor de descarga para recojer los datos almacenados de sesiones anteriores
-    * @param Nombre Nombre del libro
-    * @param Autor Autor del libro
-    * @param Genero ArrayList <String> que contiene los generos del libro
-    * @param path contiene el nombre completo del archivo del libro (si a este se le agrega el path de carpeta se tiene el path del libro)
-    * @param descargas # de descargas que ha tenido el libro
-    * @param cantidadDescargando # de descargas activas de este libro
+    * @param Nombre Nombre del video
+    * @param path contiene el nombre completo del archivo del video (si a este se le agrega el path de carpeta se tiene el path del video)
+    * @param descargas # de descargas que ha tenido el video
+    * @param cantidadDescargando # de descargas activas de este video
     */
     public Video(String Nombre, String path, int descargas, int cantidadDescargando ) {
         this.Nombre=Nombre;
