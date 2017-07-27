@@ -1,68 +1,79 @@
-
 package Model;
 
 /**
+ * Clase Cliente.
  *
  * @author Atahualpa Silva F. <https://github.com/atahualpasf>
  */
 public class Client extends Object {
-    private String IdNombre ;
-    private int numeroDeConecciones;
 
+         private String IdNombre;
+         private int numeroDeConecciones;
 
-    /**
-    * crea un DatosCliente recien inicializado (para cuando se crea un registro nuevo)
-    * @param IdNombre es el nombre del cliente 
-    */      
-    public Client(String Nombre) {
-        this.IdNombre=Nombre;
-        this.numeroDeConecciones=1;   
-    }
-    
-    /**
-    * crea un DatosCliente con los datos (para cuando se cargan los datos de un cliente)
-    * @param IdNombre es el nombre del cliente 
-    * @param numeroDeConecciones es el numero de conecciones del cliente
-    */    
-    public Client(String Nombre, int conecciones) {
-        this.IdNombre=Nombre;
-        this.numeroDeConecciones=conecciones;
-    }
-    
-    /**
-    * devuelve el nombre del cliente
-    */   
-    public String  getNombre(){
-        return this.IdNombre;}
- 
-    /**
-     * devuelve el numero de visitas
-     */   
-    public int  getVisitas(){
-        return numeroDeConecciones;}    
-    
-    /**
-    * Se agrega un cliente al historial y a clientes conectados
-    */    
-    public void sumarCliente(){
-        this.numeroDeConecciones++;   
-    }
-    
-    @Override
-    public String toString(){
-        return this.getNombre()+"."+this.getVisitas();
-    }
+         /**
+          * Contructor de clase. Utilizado para regsitrar los datos del cliente
+          * al momento de su conexión.
+          *
+          * @param Nombre ID del cliente que se esta registrando.
+          */
+         public Client(String Nombre) {
+                  this.IdNombre = Nombre;
+                  this.numeroDeConecciones = 1;
+         }
 
-   @Override
-    public boolean equals(Object o){
-        if (o instanceof Client){
-            String Temp = ((Client) o).IdNombre;
-            return ((this.IdNombre).equals(Temp));}
-        else if (o instanceof String) {
-            String Temp = (String) o;
-            return ((this.IdNombre).equals((String)o));}
-        return false;
-    }
-    
-        
+         /**
+          * Cinstructor de clase. Utilizado para regsitrar los datos del cliente
+          * al momento de su conexión.
+          *
+          * @param Nombre
+          * @param conecciones
+          */
+         public Client(String Nombre, int conecciones) {
+                  this.IdNombre = Nombre;
+                  this.numeroDeConecciones = conecciones;
+         }
+
+         /**
+          * Método utilizado para obtener el nombre del cliente.
+          *
+          * @return Nombre del cliente.
+          */
+         public String getNombre() {
+                  return this.IdNombre;
+         }
+
+         /**
+          * Método utilizado para otener el número de visitas realizado por un
+          * cliente.
+          *
+          * @return Número de visitas.
+          */
+         public int getVisitas() {
+                  return numeroDeConecciones;
+         }
+
+         /**
+          * Método utilizado para llevar un conteo de las conexiones del
+          * cliente.
+          */
+         public void sumarCliente() {
+                  this.numeroDeConecciones++;
+         }
+
+         @Override
+         public String toString() {
+                  return this.getNombre() + "." + this.getVisitas();
+         }
+
+         @Override
+         public boolean equals(Object o) {
+                  if (o instanceof Client) {
+                           String Temp = ((Client) o).IdNombre;
+                           return ((this.IdNombre).equals(Temp));
+                  } else if (o instanceof String) {
+                           String Temp = (String) o;
+                           return ((this.IdNombre).equals((String) o));
+                  }
+                  return false;
+         }
 }
