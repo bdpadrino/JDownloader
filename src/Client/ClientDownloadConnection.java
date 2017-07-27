@@ -117,7 +117,7 @@ public class ClientDownloadConnection extends Thread {
             System.out.println(this.nombreVideo+" "+(descargadoDelArchivo*100/tamañoArchivo)+"%");
         } catch (IOException e) {
             System.out.println(" ");
-            System.err.println("Upps se callo la descarga. ");
+            System.err.println("Se ha detectado un error en la descarga.");
         }finally
         {
             try
