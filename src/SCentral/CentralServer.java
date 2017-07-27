@@ -219,8 +219,8 @@ public class CentralServer {
     
     public static void main(String args[]) throws IOException, InterruptedException {
         try{   
-            final int puertoEscuchaClientes= 10580;
-            final int puertoEscuchaServidoresD= 10581;
+            final int puertoEscuchaClientes = 10580;
+            final int puertoEscuchaServidoresD = 10581;
 
            //Cargar lista de clientes con sus nombres y cantidad de visitas 
             ArrayList<Client> ListaClientes= new ArrayList<Client>();        

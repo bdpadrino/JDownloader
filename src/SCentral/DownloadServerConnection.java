@@ -24,7 +24,7 @@ public class DownloadServerConnection extends Thread {
     private ArrayList<VideoForDownloadServer> ListaVideos;
 
     
-      /**
+     /**
      * CONTRUCTOR DE LA CLASE
      * @param socket
      * @param id
@@ -63,41 +63,31 @@ public class DownloadServerConnection extends Thread {
      * @param ListaVideos
      * @param ServidorDeDescarga 
      */   
-    public void LecturaDeSD (String listaVideosDelServerD,ArrayList <VideoForDownloadServer> ListaVideos, int ServidorDeDescarga){
-       String [] Ls=listaVideosDelServerD.split("\n");
-       String[] temp;
-       ArrayList <String> temp2;
+    public void LecturaDeSD (String listaVideosDelServerD,ArrayList <VideoForDownloadServer> ListaVideos, int ServidorDeDescarga) {        
+       String [] fileWithExtensionList = listaVideosDelServerD.split("\n");
+       String[] pieceOfFile;
        int i =0;  //Empieza en 1 dado que en 0 lo que hay es /path/videos:
-       int j=0;
        Video Video;
 
-       while(i< Ls.length){
-            temp=((String)Ls[i]).split("\\.");
-            //System.out.println(Ls[i]);
-            j=2;
-            temp2=new ArrayList <String>();
-            while(j<temp.length-1){
-                //System.out.println(temp[j]);
-                temp2.add(temp[j]);
-                j++;
-            }
-            if (temp.length>2){
-                Video=new Video(temp[0],temp[1], temp2 );
-                int indiceVideo =(ListaVideos).indexOf(new VideoForDownloadServer (Video ));
-                if (indiceVideo==-1){
+       while(i< fileWithExtensionList.length) {
+            pieceOfFile=((String)fileWithExtensionList[i]).split("\\.");
+            if (pieceOfFile.length == 2) {
+                Video = new Video(pieceOfFile[0]);
+                int indiceVideo = (ListaVideos).indexOf(new VideoForDownloadServer(Video));
+                if (indiceVideo == -1) {
                    ArrayList <Integer> lista= new ArrayList <Integer>();
                    lista.add(ServidorDeDescarga);
                    VideoForDownloadServer videoYServidor= new  VideoForDownloadServer(Video,lista); 
                    //si el video no esta en la lista lo agrega
                    ListaVideos.add( videoYServidor ); 
-                System.out.println("              Video nuevo registrado: "+ temp[0]);}
-                   else{ 
+                   System.out.println("              Video nuevo registrado: "+ pieceOfFile[0]);
+                } else { 
                    ListaVideos.get(indiceVideo).addServidorD(ServidorDeDescarga );
-                   System.out.println("              Video ya registrado: "+ temp[0]); }
+                   System.out.println("              Video ya registrado: "+ pieceOfFile[0]);
+                }
             }
             i++;
         }
-            
     }
     
     /**
@@ -118,7 +108,7 @@ public class DownloadServerConnection extends Thread {
             System.out.println("VAMOS A SINCRONIZAR");
             for (final VideoForDownloadServer videoYServidores : syncDownloadList) {
                 // Here your room is available
-                System.out.println("Nombre: " + videoYServidores.getNombre() + "\t Autor" + videoYServidores.getAutor());
+                System.out.println("Nombre: " + videoYServidores.getNombre());
                 System.out.print("Lista de servidores: ");
 
                 for (final int idServer : videoYServidores.getListaServidoresD()) {
@@ -156,8 +146,10 @@ public class DownloadServerConnection extends Thread {
                 ServidorDeDescarga=DatosServer.get(indiceServidorDActual);
                 ServidorDeDescarga.activo();
             }
+
             dos.writeInt(indiceServidorDActual);
             String listaVideosDelServerD=dis.readUTF();
+
            
             LecturaDeSD (listaVideosDelServerD,ListaVideos,indiceServidorDActual);
             System.out.println("Leyo los videos");
@@ -174,10 +166,7 @@ public class DownloadServerConnection extends Thread {
                 int y;
                 for(int i=0; i<x; i++){
                     videoTemp=syncToDownload.get(i);
-                    STemp=videoTemp.getNombre()+"."+videoTemp.getAutor()+".";
-                    for(int j=0; j<videoTemp.getGenerosSize(); j++){
-                        STemp=STemp+videoTemp.getGenero(j)+" ";
-                    }
+                    STemp=videoTemp.getNombre();
                     dos.writeUTF(STemp);
                 }
                 String [] Instrucciones;

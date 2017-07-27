@@ -94,32 +94,32 @@ public class ClientConnection extends Thread {
                 instruccion= dis.readUTF();
                 System.out.println(instruccion);
                 Instrucciones= instruccion.split("-");
-                if ("a".equals(Instrucciones[0]) ){
+                if ("a".equals(Instrucciones[0]) ) {
                     System.out.println("paso");
                     x=ListaVideosYSusServidores.size();
                     dos.writeInt(x);
                     for(int i=0; i<x; i++){
                         libroTemp=ListaVideosYSusServidores.get(i);
-                        if ((libroTemp.getAutor()).equals(Instrucciones[1])){
+                        STemp = libroTemp.getNombre();
+                        /*if ((libroTemp.getAutor()).equals(Instrucciones[1])){
                             STemp=libroTemp.getNombre()+"."+libroTemp.getAutor()+".";
                             for(int j=0; j<libroTemp.getGenerosSize(); j++){
                                 STemp=STemp+libroTemp.getGenero(j)+" ";
                             }
                         dos.writeUTF(STemp);
-                        }
+                        }*/
+                        dos.writeUTF(STemp);
 
                     }
                     dos.writeUTF("fin");
-                }else if ( "l".equals(instruccion) ){
-                    x=ListaVideosYSusServidores.size();
+                } else if ( "L".equals(instruccion) ) {
+                    System.out.println("ENTRO EN L");
+                    System.out.println(ListaVideosYSusServidores.size());
+                    x = ListaVideosYSusServidores.size();
                     dos.writeInt(x);
-                    for(int i=0; i<x; i++){
+                    for(int i=0; i<x ; i++){
                         libroTemp=ListaVideosYSusServidores.get(i);
-                        STemp=libroTemp.getNombre()+"."+libroTemp.getAutor()+".";       
-                        for(int j=0; j<libroTemp.getGenerosSize(); j++){
-                            STemp=STemp+libroTemp.getGenero(j)+" ";
-                        }
-                        
+                        STemp=libroTemp.getNombre();                        
                         dos.writeUTF(STemp);
                     }
                 } else if ( "d".equals(Instrucciones[0]) || "descarga".equals(Instrucciones[0]) ) {

@@ -52,7 +52,7 @@ public class VideoForDownloadServer {
    
             this.numeroDescargas=numeroDescargas;   
         }
-    public String getAutor(){return Video.getAutor() ;}
+
     public String getNombre(){return Video.getNombre() ;}
     public Video getVideo(){return Video;}
     
@@ -70,11 +70,6 @@ public class VideoForDownloadServer {
     public int getServidor(int i){return this.ListaServidoresD.get(i);}
     public int getDescargasServidor(int i){return this.CantidadDeDescargasPorServidor.get(i);}
     public int getServidoresSize(){return this.ListaServidoresD.size();}
-    
-    public String getGenero(int i){
-
-        return this.Video.getGenero(i);}
-    public int getGenerosSize(){return this.Video.getGenerosSize();}
 
     
     /* BEGIN SYNC DOWNLOAD SERVERS */
@@ -109,26 +104,25 @@ public class VideoForDownloadServer {
     public boolean equals(Object o){
         if (o instanceof VideoForDownloadServer){
             String TempNombre =  ( ((VideoForDownloadServer)o).Video).getNombre();
-            String TempAutor = ( ((VideoForDownloadServer) o).Video).getAutor();
-            return ((this.Video.getNombre()).equals(TempNombre)&&(this.Video.getAutor()).equals(TempAutor) );
+            return ((this.Video.getNombre()).equals(TempNombre) );
         }
         return false;
     }
    
     @Override
-    public String toString(){
-        String S="";
-        String sep=".";
-        S=numeroDescargas+"";
-        for (int i=0;i<ListaServidoresD.size(); i++   ){
-            S=S+sep+ListaServidoresD.get(i);
+    public String toString() {
+        String object = "";
+        String separator = ".";
+        object = numeroDescargas+"";
+        for (int i = 0 ; i<ListaServidoresD.size() ; i++ ){
+            object = object + separator + ListaServidoresD.get(i);
         }
-        S=S+"-";
-        for (int i=0;i<CantidadDeDescargasPorServidor.size(); i++   ){
-            S=S+CantidadDeDescargasPorServidor.get(i)+sep;
+        object = object+"-";
+        for (int i = 0 ; i < CantidadDeDescargasPorServidor.size() ; i++){
+            object = object+CantidadDeDescargasPorServidor.get(i) + separator;
         }
-        S=S+"fin";
-        return S;
+        object = object + "fin";
+        return object;
     }
     
     

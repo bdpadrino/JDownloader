@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class Client {
     
     private static String clientId                                 = "";
-    //public static String ipServer                                = "192.168.0.105";
+    //public static String ipServer                                  = "192.168.1.100";
     private static final String ipServer                           = "localhost";
     private static final int portServer                            = 10580; 
     private static Socket clientSocket                             = null;
@@ -67,7 +67,7 @@ public class Client {
                 Instrucciones= instruccion.split("-");
                
                 if ( "L".equals(Instrucciones[0])){
-                    dataToServer.writeUTF("l");
+                    dataToServer.writeUTF("L");
                     //LEE EL TAMANO DE LA LISTA DE VIDEOS A RECIBIR
                     x = dataFromServer.readInt(); 
                     System.out.println(x);

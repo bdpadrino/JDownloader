@@ -105,141 +105,120 @@ class ServerDDemonCliente extends Thread {
 
 public class DownloadServer {
     
-    private static ArrayList<SyncConnection>downloadList = new ArrayList<SyncConnection>();    
+    private static ArrayList<SyncConnection>downloadList = new ArrayList<SyncConnection>();
     
     public static void main(String args[]) throws IOException, InterruptedException {
         
-        
-    final String path="C:\\Videos";
-    //final String ipServer= "192.168.250.1";
-    final String ipServer= "localhost";
-    final int puertoConeccionServer=10581;
+        final String path = "C:\\Videos";
+        //final String ipServer = "192.168.1.100";
+        final String ipServer= "localhost";
+        final int puertoConeccionServer = 10581;
 
-    ServerDDemonCliente SDDaC=null;
+        ServerDDemonCliente SDDaC = null;
 
-    //Cargar lista de videos y sus historiales del txt 
-    ArrayList<Video> ListaVideos= new ArrayList<Video>();
-    
-    //Cargar lista de Clientes y sus historiales del txt
-    ArrayList <Client> ListaClientes=new ArrayList<Client>();        
-   
-    //Una vez cargado la lista de videos del txt de config verificamos la carpeta y agregamos cualquier otro
-    String textoListaVideos = CargarVideosCarpeta (ListaVideos,path );
+        //Cargar lista de videos y sus historiales del txt 
+        ArrayList<Video> ListaVideos = new ArrayList<Video>();
 
-    //Leer meta data del SD
-    int idServidorD=-1; // el -1 es cuando no han habido conexiones previas y se espera que el server te asigne un ID
+        //Cargar lista de Clientes y sus historiales del txt
+        ArrayList <Client> ListaClientes = new ArrayList<Client>();        
 
+        //Una vez cargado la lista de videos del txt de config verificamos la carpeta y agregamos cualquier otro
+        String textoListaVideos = CargarVideosCarpeta (ListaVideos,path );
+        System.out.println("TEXTO LISTA VIDEOS" + textoListaVideos);
 
-    Scanner teclado = new Scanner(System.in);
+        //Leer meta data del SD
+        int idServidorD=-1; // el -1 es cuando no han habido conexiones previas y se espera que el server te asigne un ID
 
-    Socket sk;
-  
+        Scanner teclado = new Scanner(System.in);
 
-    try {
+        Socket sk;
 
-        sk = new Socket(ipServer, puertoConeccionServer);
+        try {
+            sk = new Socket(ipServer, puertoConeccionServer);
+            DataOutputStream dos = new DataOutputStream(sk.getOutputStream());
+            DataInputStream dis = new DataInputStream(sk.getInputStream());
 
-        DataOutputStream dos = new DataOutputStream(sk.getOutputStream());
-        DataInputStream dis = new DataInputStream(sk.getInputStream());
+            dos.writeInt(idServidorD);
 
-        dos.writeInt(idServidorD);
+            SDDaC= new ServerDDemonCliente(ListaVideos,ListaClientes,path);
+            int puertoClientes=SDDaC.getLocalPort();
+            dos.writeInt(puertoClientes);
+            System.out.println("Puerto de escucha para Clientes: "+puertoClientes);
+            dos.writeUTF(textoListaVideos); 
 
-        SDDaC= new ServerDDemonCliente(ListaVideos,ListaClientes,path);
-        int puertoClientes=SDDaC.getLocalPort();
-        dos.writeInt(puertoClientes);
-        System.out.println("Puerto de escucha para Clientes: "+puertoClientes);
+            idServidorD=dis.readInt();
 
-        dos.writeUTF(textoListaVideos); 
+            if (dis.readUTF().equals("Sync")) {
+                System.out.println("Sincronizar......");
+                int x=dis.readInt();
+                System.out.println(x);
+                ArrayList<String> videosADescargar=new ArrayList<String>();
+                String lecturaList[];
+                String lectura;
+                for(int i=0; i<x; i++){
+                    lectura=dis.readUTF();
+                    lecturaList= lectura.split("\\.",3);
+                    if ("fin".equals(lecturaList[0])){break; }
+                        videosADescargar.add("d-"+lecturaList[0]+"-"+lecturaList[1]);
+                        System.out.printf( "%-40s %-20s %-30s %n", lecturaList[0], lecturaList[1],lecturaList[2]);
+                }
+                lecturaList=null;
+                for(int i=0; i<videosADescargar.size(); i++){
 
-        idServidorD=dis.readInt();
+                    dos.writeUTF(videosADescargar.get(i));
+                    String respues=dis.readUTF();
+                    if (respues.equals("ok")){
+                        int indiceServ=dis.readInt();
+                        int puerto=dis.readInt();
+                        String Ip=dis.readUTF();
+                        lecturaList=videosADescargar.get(i).split("-",3);
+                        System.out.println(lecturaList[1]+" "+lecturaList[2]);
 
-        if (dis.readUTF().equals("Sync")) {
-            System.out.println("Sincronizar......");
-            int x=dis.readInt();
-            System.out.println(x);
-            ArrayList<String> videosADescargar=new ArrayList<String>();
-            String lecturaList[];
-            String lectura;
-            for(int i=0; i<x; i++){
-                lectura=dis.readUTF();
-                lecturaList= lectura.split("\\.",3);
-                if ("fin".equals(lecturaList[0])){break; }
-                    videosADescargar.add("d-"+lecturaList[0]+"-"+lecturaList[1]);
-                    System.out.printf( "%-40s %-20s %-30s %n", lecturaList[0], lecturaList[1],lecturaList[2]);
+                        SyncConnection cnd=new SyncConnection(0,indiceServ,Ip,puerto,lecturaList[1],lecturaList[2],String.valueOf(idServidorD));
+                        downloadList.add(cnd);
+                        cnd.start();
+                    }else { System.out.println("El video no esta dataFromServerponible"+lecturaList[1]);}
+
+                }
+                dos.writeUTF("fin");
             }
-            lecturaList=null;
-            for(int i=0; i<videosADescargar.size(); i++){
+            System.out.println(dis.readUTF());
+            SDDaC.start();
 
-                dos.writeUTF(videosADescargar.get(i));
-                String respues=dis.readUTF();
-                if (respues.equals("ok")){
-                    int indiceServ=dis.readInt();
-                    int puerto=dis.readInt();
-                    String Ip=dis.readUTF();
-                    lecturaList=videosADescargar.get(i).split("-",3);
-                    System.out.println(lecturaList[1]+" "+lecturaList[2]);
+            String comando;
+            String autor;
+            String nombreVideo;
+            Thread.sleep(1500);
 
-                    SyncConnection cnd=new SyncConnection(0,indiceServ,Ip,puerto,lecturaList[1],lecturaList[2],String.valueOf(idServidorD));
-                    downloadList.add(cnd);
-                    cnd.start();
-                }else { System.out.println("El video no esta dataFromServerponible"+lecturaList[1]);}
+            do {
+                System.out.println("Opciones:");
+                System.out.println("1: VIDEOS_DESCARGANDO");
+                System.out.println("2: VIDEOS_DESCARGADOS");
+                //System.out.println("3: CLIENTES_FIELES");
+                System.out.println("4: Salir");
+                comando=(teclado.nextLine());
+                if (comando.equals("VIDEOS_DESCARGANDO") ||comando.equals("1") ){
 
-            }
-            dos.writeUTF("fin");
-        }
-        System.out.println(dis.readUTF());
-        SDDaC.start();
+                    System.out.printf( "%-30s  %-6s %n", "Video" , "# descargando");
+                    System.out.println("-----------------------------------------------------------------");
+                    for (int i=0; i <ListaVideos.size();i++ ){
+                        nombreVideo=ListaVideos.get(i).getNombre();
+                        if (ListaVideos.get(i).getDescargando()>0) {
+                            System.out.printf( "%-30s %-6s %n", nombreVideo , ListaVideos.get(i).getDescargando());
+                        }
+                    }
+                }else if (comando.equals("VIDEOS_DESCARGADOS") ||comando.equals("2")) {
 
-        String comando;
-        String autor;
-        String nombreVideo;
- 
-        Thread.sleep(1500);
-
-        do {
-            System.out.println("Opciones:");
-            System.out.println("1: VIDEOS_DESCARGANDO");
-            System.out.println("2: VIDEOS_DESCARGADOS");
-            //System.out.println("3: CLIENTES_FIELES");
-            System.out.println("4: Salir");
-            comando=(teclado.nextLine());
-            if (comando.equals("VIDEOS_DESCARGANDO") ||comando.equals("1") ){
-
-                System.out.printf( "%-30s  %-6s %n", "Video" , "# descargando");
-                System.out.println("-----------------------------------------------------------------");
-                for (int i=0; i <ListaVideos.size();i++ ){
-                    nombreVideo=ListaVideos.get(i).getNombre();
-                    autor=ListaVideos.get(i).getAutor();
-                     if (ListaVideos.get(i).getDescargando()>0){
-                        System.out.printf( "%-30s %-6s %n", nombreVideo , ListaVideos.get(i).getDescargando());
+                    System.out.printf( "%-30s  %-6s %n", "Video" , "# descargado");
+                    System.out.println("-----------------------------------------------------------------");
+                    for (int i=0; i <ListaVideos.size();i++ ){
+                        nombreVideo=ListaVideos.get(i).getNombre();
+                        if (ListaVideos.get(i).getDescargas()>0){
+                            System.out.printf( "%-30s  %-6s %n", nombreVideo , ListaVideos.get(i).getDescargas());
+                        }
                     }
                 }
-            }else if (comando.equals("VIDEOS_DESCARGADOS") ||comando.equals("2")) {
-
-                System.out.printf( "%-30s  %-6s %n", "Video" , "# descargado");
-                System.out.println("-----------------------------------------------------------------");
-                for (int i=0; i <ListaVideos.size();i++ ){
-                    nombreVideo=ListaVideos.get(i).getNombre();
-                    autor=ListaVideos.get(i).getAutor();
-                     if (ListaVideos.get(i).getDescargas()>0){
-                        System.out.printf( "%-30s  %-6s %n", nombreVideo , ListaVideos.get(i).getDescargas());
-                    }
-                }
-            }
-            
-            /*else if (comando.equals("CLIENTES_FIELES")||comando.equals("3")){
-                System.out.printf( "%-30s  %-15s %n", "Nombre" , "# de descargas");
-                System.out.println("---------------------------------------------------");
-                for (int i=0; i <ListaClientes.size();i++ ){
-                    nombreVideo=ListaClientes.get(i).getNombre();
-                     if (ListaClientes.get(i).getVisitas()>0){
-                        System.out.printf( "%-30s  %-15s %n", nombreVideo,ListaClientes.get(i).getVisitas());
-                    }
-                }            
-            }*/
-        } while(! ("adios".equals(comando)|| comando.equals("4")));
-
-           
+            } while(! ("adios".equals(comando)|| comando.equals("4")));
             
         } catch (IOException ex) {
             System.err.println("Error de conexion IOException");
@@ -253,51 +232,43 @@ public class DownloadServer {
         catch (Exception e) {
              System.err.println("Error de conexion Exception");
         }
-        
-          
     }
     
     public static String CargarVideosCarpeta (ArrayList<Video> ListaVideos, String path){
 
         Terminal t = new Terminal();
-        //t.executeCommand("ls");
 
-        System.out.println("Hola");
-        System.out.println(path);
+        System.out.println("Path: " + path);
         //String ls= t.executeCommand("ls -1B "+path); //LINUX
         //String ls= t.executeCommand("dir /B " + path); //WINDOWS
-        String ls= t.executeCommand("cmd /c dir /B " + path); //WINDOWS
-
-        String [] Ls=ls.split("\n");
-        String[] temp;
-        ArrayList <String> temp2;
-        int i =0;  //Empieza en 1 dado que en 0 lo que hay es /path/videos:
-        int j=0;
-        Video Video;
-        //System.out.println(Ls.length);
+        String listFromCommand= t.executeCommand("cmd /c dir /B " + path); //WINDOWS 10
+        System.out.println(listFromCommand);
         
-        while(i< Ls.length){
-            temp=((String)Ls[i]).split("\\.");
-            System.out.println(Ls[i]);
-            j=2;
-            temp2=new ArrayList <String>();
-            //System.out.println(temp.length);
-            while(j<temp.length-1){
-                System.out.println(temp[j]);
-                temp2.add(temp[j]);
-                j++;
-            }
-            if (temp.length>2){
-                Video=new Video(temp[0],temp[1], temp2, Ls[i] );
-                int indiceVideo =ListaVideos.indexOf(Video);
-                if (indiceVideo==-1){ListaVideos.add(Video);
-                System.out.println("              Se registro el video: "+ temp[0]);} //si el video no esta en la lista lo agrega
-                else{ System.out.println("              Video ya registrado: "+ temp[0]);}
+        String [] fileWithExtensionList = listFromCommand.split("\n");
+        String[] pieceOfFile;
+        int i =0;  //Empieza en 1 dado que en 0 lo que hay es /path/videos:
+        Video Video;
+        
+        System.out.println("Número de archivos: " + fileWithExtensionList.length);
+        
+        while(i < fileWithExtensionList.length) {
+            System.out.println("Archivo a picar: " + fileWithExtensionList[i]);
+            pieceOfFile = ( (String) fileWithExtensionList[i]).split("\\.");            
+            if (pieceOfFile.length == 2) {
+                Video = new Video(pieceOfFile[0], fileWithExtensionList[i]);
+                int indiceVideo = ListaVideos.indexOf(Video);
+                if (indiceVideo == -1) {
+                    ListaVideos.add(Video);
+                    System.out.println("              Se registro el video: " + pieceOfFile[0]);
+                } else { 
+                    System.out.println("              Video ya registrado: " + pieceOfFile[0]);
+                }
             }
             i++;
         }
-        System.out.println("Cantidad de videos: "+ListaVideos.size());
-        return ls;
+        System.out.println("Cantidad de videos: " + ListaVideos.size());
+        System.out.println(listFromCommand);
+        return listFromCommand;
     }
     
 }
